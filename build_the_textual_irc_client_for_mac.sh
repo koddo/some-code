@@ -19,6 +19,7 @@ SIGNING_IDENTITY='Alex Scherbanov'
 
 git clone https://github.com/Codeux-Software/Textual.git Textual
 cd Textual
+git checkout tags/v6.0.6
 git submodule update --init --recursive
 sed -i -e "s/Mac Developer/$SIGNING_IDENTITY/g"                                             Resources/Build\ Configurations/Code\ Signing\ Identity.xcconfig
 sed -i -e 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = /g'                                   Resources/Build\ Configurations/Code\ Signing\ Identity.xcconfig
