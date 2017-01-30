@@ -97,8 +97,11 @@
     #     name: docker
     #     state: restarted
     
-    
-  
+
+    # TODO: add to the end
+    # - name: for dnsdock 
+    #   lineinfile: dest="/lib/systemd/system/docker.service" regexp="^ExecStart=/usr/bin/dockerd -H fd://" line="ExecStart=/usr/bin/dockerd -H fd:// --bip=172.17.0.1/16 --dns=172.17.0.1"
+
 
 
 
