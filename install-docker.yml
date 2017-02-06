@@ -70,10 +70,10 @@
     
     - name: install docker-compose
       get_url:
-        url: https://github.com/docker/compose/releases/download/1.10.0/docker-compose-{{ ansible_system }}-{{ ansible_machine }}
+        url: https://github.com/docker/compose/releases/download/1.10.1/docker-compose-{{ ansible_system }}-{{ ansible_machine }}
         dest: /usr/local/bin/docker-compose
         mode: 0755
-        checksum: sha256:a4ddff871c67d16cc0b0de9f1c90d5a419dd95515076e5a66493c695beb30b50
+        checksum: sha256:20c5e6d6374402cfaef727fd85397d926b19bf1f8ed6b68f465023470d4bed85
         backup: yes
     
     - name: make sure docker-compose owner is root:root, 0755
@@ -100,7 +100,7 @@
 
     # TODO: add to the end
     # - name: for dnsdock 
-    #   lineinfile: dest="/lib/systemd/system/docker.service" regexp="^ExecStart=/usr/bin/dockerd -H fd://" line="ExecStart=/usr/bin/dockerd -H fd:// --bip=172.17.0.1/16 --dns=172.17.0.1"
+    #   lineinfile: dest="/lib/systemd/system/docker.service" regexp="^ExecStart=/usr/bin/dockerd -H fd://" line="ExecStart=/usr/bin/dockerd -H fd:// --bip=172.17.0.1/24 --dns=172.17.0.1"
 
 
 
