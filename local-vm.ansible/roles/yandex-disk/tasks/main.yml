@@ -1,0 +1,18 @@
+---
+
+- name: add repo to sources.list
+  apt_repository:
+    filename='yandex'
+    repo='deb http://repo.yandex.ru/yandex-disk/deb/ stable main'
+
+- name: add key
+  apt_key:
+    url: http://repo.yandex.ru/yandex-disk/YANDEX-DISK-KEY.GPG
+
+- name: install yandex disk
+  apt:
+    update_cache: yes
+    name:
+      - yandex-disk
+    state: latest
+

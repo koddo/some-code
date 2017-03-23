@@ -1,0 +1,28 @@
+---
+
+# - name: Install some prerequisites.
+#   apt:
+#     update_cache: yes
+#     cache_valid_time: 3600
+#     name:
+#       - python-gpgme
+#     state: latest
+
+- name: Install dropbox.
+  unarchive:
+    src: https://www.dropbox.com/download?plat=lnx.x86_64
+    dest: "{{ ansible_env.HOME }}"
+    creates: "{{ ansible_env.HOME }}/.dropbox-dist"
+    remote_src: True
+    # checksum: "sha256:d72d7b05f7005be718898ab1937bb68a304da70837ff8354620e4b8826afa38c"
+
+- name: Install a python script for controlling the daemon.
+  get_url:
+    url: "https://www.dropbox.com/download?dl=packages/dropbox.py"
+    dest: "{{ ansible_env.HOME }}/.dropbox-dist/dropbox.py"
+    mode: u+rwx
+    # checksum: "sha256:c4ec04afdc6524c614af5e26ad7ddd2eb9bb529fec444391d0b2d5327da06398"
+
+
+
+

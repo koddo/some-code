@@ -1,0 +1,27 @@
+FROM debian:jessie
+
+# <https://www.dropbox.com/install-linux>
+# 
+# To check for updates:
+# 
+# ```
+# $ curl -Ls -o /dev/null -w %{url_effective} -I https://www.dropbox.com/download?plat=lnx.x86_64
+# https://dl.dropboxusercontent.com/u/17/dropbox-lnx.x86_64-22.4.24.tar.gz
+# ```
+
+
+RUN apt-get update && apt-get install -y \
+            wget \
+            && \
+    apt-get -y autoclean && apt-get -y autoremove
+
+
+RUN groupadd theuser && useradd --create-home --gid theuser --uid 1000 theuser
+WORKDIR /home/theuser
+ENV HOME /home/theuser
+USER theuser
+
+RUN cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+
+CMD ["/home/theuser/.dropbox-dist/dropboxd"]
+

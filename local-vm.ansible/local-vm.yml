@@ -1,0 +1,18 @@
+- hosts: local-vm
+  remote_user: vagrant
+  roles:
+    - { role: docker,         become: true }
+    - { role: yandex-disk,    become: true }
+    - { role: dropbox}
+
+
+
+# after dropbox is installed you have to authenticate manually, run
+# $ ~/.dropbox-dist/dropboxd
+# use the link and quit it, then move the folder to shared place and symlink it
+# $ mv ~/Dropbox /mnt/hgfs && ln -s /mnt/hgfs/Dropbox
+# now make it an actual daemon
+# $ ~/.dropbox-dist/dropbox.py start
+# $ while true ; do ~/.dropbox-dist/dropbox.py status && sleep 1 ; done
+
+
