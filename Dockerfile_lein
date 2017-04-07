@@ -1,0 +1,20 @@
+FROM clojure:lein-2.7.1
+
+
+RUN apt-get update && apt-get install -y \
+            ca-certificates \
+            wget \
+            fontconfig \
+            && \
+    apt-get -y autoclean && apt-get -y autoremove
+
+
+# TODO: check sha256
+ENV PHANTOMJS_VERSION 2.1.1
+RUN wget -q -O - https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 | tar xjC /opt && \
+    ln -s /opt/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
+
+
+RUN groupadd theuser && useradd --create-home --gid theuser --uid 1000 theuser
+WORKDIR /home/theuser
+USER theuser
