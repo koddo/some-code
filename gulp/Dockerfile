@@ -7,3 +7,13 @@ RUN npm install --global gulp-cli
 
 # they already added the user
 USER node
+
+RUN mkdir ~/prj
+WORKDIR /home/node/prj
+COPY package.json .
+COPY gulpfile.js .
+
+RUN npm install
+
+CMD gulp
+
