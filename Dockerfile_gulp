@@ -1,5 +1,6 @@
 FROM node:argon
 # we use this old version, because otherwise we get obscure errors when we do `npm install` in a vmware shared folder, probably because of parallelization of later versions, just a guess 
+# https://github.com/npm/npm/issues/15034
 
 
 RUN npm install --global gulp-cli
