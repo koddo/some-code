@@ -1,0 +1,8 @@
+FROM node:argon
+# we use this old version, because otherwise we get obscure errors when we do `npm install` in a vmware shared folder, probably because of parallelization of later versions, just a guess 
+
+
+RUN npm install --global gulp-cli
+
+# they already added the user
+USER node
