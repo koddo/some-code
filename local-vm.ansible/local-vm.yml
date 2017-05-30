@@ -1,9 +1,9 @@
 - hosts: local-vm
   remote_user: vagrant
   roles:
-    - { role: docker,         become: true }
-    - { role: yandex-disk,    become: true }
-    - { role: dropbox}
+    - { role: docker,         become: true, username: vagrant }
+    # - { role: yandex-disk,    become: true }
+    # - { role: dropbox}
 
 
 
