@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-## docker build -t koddo/dropbox - < Dockerfile_yandex-disk
+## docker build -t koddo/disk-yandex - < Dockerfile_yandex-disk
 
 
 ## when I run `yandex-disk token`` instead of setup, it doesn't add dir option to config.cfg and then complains so I add it manually
@@ -13,13 +13,13 @@ yandex-disk --no-daemon --dir=~/Yandex.Disk
 '
 
 docker run -d \
-       --name yandex-disk \
+       --name disk-yandex \
        --restart on-failure \
-       -v /mnt/hgfs/Disk.Yandex:/home/theuser/Yandex.Disk \
-       koddo/yandex-disk bash -c "$CMD"
+       -v /vagrant-disk-yandex:/home/theuser/Yandex.Disk \
+       koddo/disk-yandex bash -c "$CMD"
 
 
 
-## docker logs --follow yandex-disk
-## docker exec -it yandex-disk yandex-disk token npoektop
-## docker exec -it yandex-disk yandex-disk status
+## docker logs --follow disk-yandex
+## docker exec -it disk-yandex yandex-disk token npoektop
+## docker exec -it disk-yandex yandex-disk status
