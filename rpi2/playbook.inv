@@ -1,0 +1,3 @@
+[all]
+all2fun ansible_host=all2fun.ddns.net ansible_port=443 ansible_user=pi
+

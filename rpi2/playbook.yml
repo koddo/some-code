@@ -1,0 +1,24 @@
+---
+- name: Configure my home rpi2
+  hosts: all
+  become: true
+
+  
+  tasks:
+    - name: Install some debian packages.
+      apt:
+        state: latest
+        update_cache: true
+        cache_valid_time: 3600
+        name:
+          - znc      # irc bouncer -- unpack the backup to ~/.znc and then just run `znc`
+          - lynx
+          - ddclient   # ddns.net, put the backup conf to /etc/ddclient.conf
+    - name: Add my key to authorized_keys to be able to ssh into it from emacs.
+      authorized_key:
+        user: pi
+        key: https://github.com/koddo.keys
+    - name: Set timezone.
+      timezone:
+        name: Europe/Moscow
+
