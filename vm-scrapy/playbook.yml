@@ -1,0 +1,42 @@
+- hosts: all
+  become: true
+
+  pre_tasks:
+
+    - name: Install prerequisites
+      apt:
+        name: gnupg        # quirck: the docker role wants to install gnupg2, but it was renamed
+        state: present
+        update_cache: yes
+
+    - name: Install pip
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
+        name:
+          - python-setuptools     # by whatever reason pip needs this
+          - python-pip
+          - python3-setuptools
+          - python3-pip
+      
+    - name: Install the docker module in order to use the docker_image in ansible
+      pip:
+        name: docker
+
+  roles:
+
+    - role: geerlingguy.docker
+      docker_users:
+        - vagrant
+
+  tasks:
+
+    - name: Run the scrapy-splash container
+      docker_container:
+        name: scrapy-splash
+        image: scrapinghub/splash
+        ports:
+          - "8050:8050"
+
+
+
