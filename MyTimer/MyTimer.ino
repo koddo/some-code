@@ -1,6 +1,8 @@
 #include <Arduino_FreeRTOS.h>
 #include <Keypad.h>
 
+#include "MyTimer.h"   // arduino's compiler is quirky and requires a struct to be in a header if we want to use it as a return value
+
 #define configUSE_16_BIT_TICKS   0     // 16 bits means like two minutes max delays
 
 const byte LED_OUPUT = 12;
@@ -66,23 +68,21 @@ void loop()
 /*---------------------- Tasks ---------------------*/
 /*--------------------------------------------------*/
 
-// we pass arguments using an instance of this struct in memory
-struct TaskNotifyArgs {
-  unsigned long duration;
-};
+
 
 void TaskNotify(void *pvParameters)
 {
   // (void) pvParameters;  
-  unsigned long duration = ((TaskNotifyArgs*) pvParameters)->duration;
-
+  // unsigned long duration = ((TaskNotifyArgs*) pvParameters)->duration;
+  TaskNotifyArgs* args = (TaskNotifyArgs*) pvParameters;
+  
   // there was a bug that looked like an integer overflow, when twenty minute vTaskDelay triggered every time after two and a half minutes, but I couldn't figure out why
   // but anyway we don't just convert ms to ticks, because this function is imprecise, it added like 30 secs for each 6 minutes with a certain configuration
   // so it just checks every once in a while if time if up 
 
   unsigned long start = millis();
   for(;;) {
-    if( millis() - start > duration ) {
+    if( millis() - start > args->duration ) {
       break;
     } else {
       vTaskDelay( pdMS_TO_TICKS(1000UL) );    // TODO: magic number
@@ -90,7 +90,7 @@ void TaskNotify(void *pvParameters)
     }
   }
 
-  digitalWrite(LED_OUPUT, HIGH);
+  digitalWrite(args->pin, HIGH);
 
   vTaskSuspend(NULL);    // https://www.freertos.org/implementing-a-FreeRTOS-task.html
 }
@@ -99,21 +99,17 @@ void TaskKeypadRead(void *pvParameters) {
   (void) pvParameters;
   TaskHandle_t taskHandle_Notify = NULL;
 
-  // inititialize memory to pass arguments through it when a task is created
-  // TODO: this shared chunk of memory vs. a static var or a thread local var? 
-  TaskNotifyArgs* taskNotifyArgs = (TaskNotifyArgs*) pvPortMalloc( sizeof(TaskNotifyArgs) );
-  memset(taskNotifyArgs, 0, sizeof(TaskNotifyArgs));   // was taskNotifyArgs->duration = 0;
-  //  TODO: check the return value of pvPortMalloc()
+  static TaskNotifyArgs taskNotifyArgs;
 
-   
   for (;;)
   {
    char key = keypad.getKey();
   
    if (key){
       Serial.println(key);
+      taskNotifyArgs = keyToDuration(key);
 
-      digitalWrite(LED_OUPUT, LOW);
+      digitalWrite(taskNotifyArgs.pin, LOW);
       if(taskHandle_Notify) {
         // TODO: check if it's not deleted already, otherwise the os crashes
         // right now the notify thread suspends itself instead of deleting itself
@@ -121,13 +117,12 @@ void TaskKeypadRead(void *pvParameters) {
         vTaskDelete(taskHandle_Notify);
       }
 
-      taskNotifyArgs->duration = keyToDuration(key);
       
       xTaskCreate(
         TaskNotify,
         "Notify",
         128,  // This stack size can be checked & adjusted by reading the Stack Highwater
-        (void*) taskNotifyArgs,
+        (void*) &taskNotifyArgs,
         2,  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
         &taskHandle_Notify );
       } 
@@ -150,44 +145,30 @@ void TaskSystemReport(void *pvParameters) {
   }
 }
 
-unsigned long keyToDuration(char key) {
-  unsigned long d = 0;
-
+TaskNotifyArgs keyToDuration(char key) {
   // TODO: assign meaningful delays or use toInt
-  switch (key) {
+  switch (key) {   // yes, I'm aware of the break statement, it's not needed here
     case '*':
-      d = 3 * 1000UL;
-      break;
+      return TaskNotifyArgs(12,        3 * 1000UL);
     case '1':
-      d =  20 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12,  20 * 60 * 1000UL);
     case '2':
-      d =  40 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12,  40 * 60 * 1000UL);
     case '3':
-      d =  60 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12,  60 * 60 * 1000UL);
     case '4':
-      d =  80 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12,  80 * 60 * 1000UL);
     case '5':
-      d = 100 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12, 100 * 60 * 1000UL);
     case '6':
-      d = 120 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12, 120 * 60 * 1000UL);
     case '7':
-      d = 140 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12, 140 * 60 * 1000UL);
     case '8':
-      d = 160 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12, 160 * 60 * 1000UL);
     case '9':
-      d = 180 * 60 * 1000UL;
-      break;
+      return TaskNotifyArgs(12, 180 * 60 * 1000UL);
     default:
-      d = 200UL;
+      return TaskNotifyArgs(12, 200UL);
   }
-
-  return d;
 }
