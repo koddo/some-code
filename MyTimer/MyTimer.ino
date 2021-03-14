@@ -1,7 +1,7 @@
 #include <Arduino_FreeRTOS.h>
 #include <Keypad.h>
 
-#include "MyTimer.h"   // arduino's compiler is quirky and requires a struct to be in a header if we want to use it as a return value
+#include "MyTimer.h"
 
 #define configUSE_16_BIT_TICKS   0     // 16 bits means like two minutes max delays
 
@@ -99,7 +99,7 @@ void TaskKeypadRead(void *pvParameters) {
   (void) pvParameters;
   TaskHandle_t taskHandle_Notify = NULL;
 
-  static TaskNotifyArgs taskNotifyArgs;
+  static TaskNotifyArgs taskNotifyArgs;   // strictly speaking, static is not needed here, but we leave it here to draw attention that we use this chunk as shared memory between threads
 
   for (;;)
   {
@@ -149,26 +149,26 @@ TaskNotifyArgs keyToDuration(char key) {
   // TODO: assign meaningful delays or use toInt
   switch (key) {   // yes, I'm aware of the break statement, it's not needed here
     case '*':
-      return TaskNotifyArgs(12,        3 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT,        3 * 1000UL);
     case '1':
-      return TaskNotifyArgs(12,  20 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT,  20 * 60 * 1000UL);
     case '2':
-      return TaskNotifyArgs(12,  40 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT,  40 * 60 * 1000UL);
     case '3':
-      return TaskNotifyArgs(12,  60 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT,  60 * 60 * 1000UL);
     case '4':
-      return TaskNotifyArgs(12,  80 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT,  80 * 60 * 1000UL);
     case '5':
-      return TaskNotifyArgs(12, 100 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT, 100 * 60 * 1000UL);
     case '6':
-      return TaskNotifyArgs(12, 120 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT, 120 * 60 * 1000UL);
     case '7':
-      return TaskNotifyArgs(12, 140 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT, 140 * 60 * 1000UL);
     case '8':
-      return TaskNotifyArgs(12, 160 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT, 160 * 60 * 1000UL);
     case '9':
-      return TaskNotifyArgs(12, 180 * 60 * 1000UL);
+      return TaskNotifyArgs(LED_OUPUT, 180 * 60 * 1000UL);
     default:
-      return TaskNotifyArgs(12, 200UL);
+      return TaskNotifyArgs(LED_OUPUT, 200UL);
   }
 }
