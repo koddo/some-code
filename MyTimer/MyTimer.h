@@ -7,7 +7,6 @@
 // we pass arguments using an instance of this struct in memory
 class TaskNotifyArgs {
 public:
-  TaskHandle_t taskHandle = NULL;
   int pin = 0;
   unsigned long duration = 0;
 

@@ -72,8 +72,6 @@ void loop()
 
 void TaskNotify(void *pvParameters)
 {
-  // (void) pvParameters;  
-  // unsigned long duration = ((TaskNotifyArgs*) pvParameters)->duration;
   TaskNotifyArgs* args = (TaskNotifyArgs*) pvParameters;
   
   // there was a bug that looked like an integer overflow, when twenty minute vTaskDelay triggered every time after two and a half minutes, but I couldn't figure out why
@@ -98,7 +96,6 @@ void TaskNotify(void *pvParameters)
 void TaskKeypadRead(void *pvParameters) {
   (void) pvParameters;
   TaskHandle_t taskHandle_Notify = NULL;
-
   static TaskNotifyArgs taskNotifyArgs;   // strictly speaking, static is not needed here, but we leave it here to draw attention that we use this chunk as shared memory between threads
 
   for (;;)
