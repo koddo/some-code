@@ -36,8 +36,10 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB, on LEONARDO, MICRO, YUN, and other 32u4 based boards.
   }
 
-  pinMode(LED_OUPUT, OUTPUT);
+  pinMode(LED_OUPUT, OUTPUT);   // TODO: replace all occurences of this magic number
   digitalWrite(LED_OUPUT, HIGH);
+  pinMode(11, OUTPUT); // TODO: magic number
+  digitalWrite(11, HIGH);
   
   pinMode(LED_BUILTIN, OUTPUT);   
   digitalWrite(LED_BUILTIN, LOW);   // I turn it off, so it doesn't distract me
@@ -93,38 +95,73 @@ void TaskNotify(void *pvParameters)
   vTaskSuspend(NULL);    // https://www.freertos.org/implementing-a-FreeRTOS-task.html
 }
 
-void TaskKeypadRead(void *pvParameters) {
-  (void) pvParameters;
-  TaskHandle_t taskHandle_Notify = NULL;
-  static TaskNotifyArgs taskNotifyArgs;   // strictly speaking, static is not needed here, but we leave it here to draw attention that we use this chunk as shared memory between threads
+void TaskNotifyArgs::restart(unsigned long d) {
 
+  duration = d;
+  
+  digitalWrite(pin, LOW);
+  if(taskHandle) {
+    // TODO: check if it's not deleted already, otherwise the os crashes
+    // right now the notify thread suspends itself instead of deleting itself
+    // because if you try to delete it a second time, it hangs or crashes
+    vTaskDelete(taskHandle);
+  }
+
+  xTaskCreate(
+    TaskNotify,
+    taskName.c_str(),
+    128,  // This stack size can be checked & adjusted by reading the Stack Highwater
+    (void*) this,
+    2,  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    &taskHandle );
+  
+  
+}
+
+void TaskKeypadRead(void *pvParameters) {
+
+  
+  TaskNotifyArgs taskNotifyArgs1("Notify1", 12, TaskNotify);
+  TaskNotifyArgs taskNotifyArgs2("Notify2", 11, TaskNotify);
+
+  // BOOKMARK
+  // TODO: rename TaskNotifyArgs to something
+  // TODO: other todos
+  
   for (;;)
   {
-   char key = keypad.getKey();
+    char key = keypad.getKey();
   
-   if (key){
+    if (key){
       Serial.println(key);
-      taskNotifyArgs = keyToDuration(key);
 
-      digitalWrite(taskNotifyArgs.pin, LOW);
-      if(taskHandle_Notify) {
-        // TODO: check if it's not deleted already, otherwise the os crashes
-        // right now the notify thread suspends itself instead of deleting itself
-        // because if you try to delete it a second time, it hangs or crashes
-        vTaskDelete(taskHandle_Notify);
+      switch (key) {
+
+        case '1': taskNotifyArgs1.restart(    20 * 60 * 1000UL); break;          
+        case '2': taskNotifyArgs1.restart(    40 * 60 * 1000UL); break;          
+        case '3': taskNotifyArgs1.restart(    60 * 60 * 1000UL); break;          
+        case 'A': taskNotifyArgs1.restart(    90 * 60 * 1000UL); break;          
+        case '4': taskNotifyArgs1.restart(2 * 60 * 60 * 1000UL); break;          
+        case '5': taskNotifyArgs1.restart(4 * 60 * 60 * 1000UL); break;          
+        case '6': taskNotifyArgs1.restart(6 * 60 * 60 * 1000UL); break;          
+        case 'B': taskNotifyArgs1.restart(              1000UL); break;          
+
+        case '7': taskNotifyArgs2.restart(    20 * 60 * 1000UL); break;          
+        case '8': taskNotifyArgs2.restart(    40 * 60 * 1000UL); break;          
+        case '9': taskNotifyArgs2.restart(    60 * 60 * 1000UL); break;          
+        case 'C': taskNotifyArgs2.restart(    90 * 60 * 1000UL); break;          
+        case '*': taskNotifyArgs2.restart(2 * 60 * 60 * 1000UL); break;          
+        case '0': taskNotifyArgs2.restart(4 * 60 * 60 * 1000UL); break;          
+        case '#': taskNotifyArgs2.restart(6 * 60 * 60 * 1000UL); break;          
+        case 'D': taskNotifyArgs2.restart(              1000UL); break;          
+
+        default:
+          ;
+          // pass
       }
-
-      
-      xTaskCreate(
-        TaskNotify,
-        "Notify",
-        128,  // This stack size can be checked & adjusted by reading the Stack Highwater
-        (void*) &taskNotifyArgs,
-        2,  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-        &taskHandle_Notify );
-      } 
   
       vTaskDelay(1);  // one tick delay (15ms) in between reads for stability
+    }
   }
 }
 
@@ -139,33 +176,5 @@ void TaskSystemReport(void *pvParameters) {
     // TODO: stress test the current thing with timers in threads by emulating a lot of keypresses
   
     vTaskDelay(pdMS_TO_TICKS(10 * 1000UL));
-  }
-}
-
-TaskNotifyArgs keyToDuration(char key) {
-  // TODO: assign meaningful delays or use toInt
-  switch (key) {   // yes, I'm aware of the break statement, it's not needed here
-    case '*':
-      return TaskNotifyArgs(LED_OUPUT,        3 * 1000UL);
-    case '1':
-      return TaskNotifyArgs(LED_OUPUT,  20 * 60 * 1000UL);
-    case '2':
-      return TaskNotifyArgs(LED_OUPUT,  40 * 60 * 1000UL);
-    case '3':
-      return TaskNotifyArgs(LED_OUPUT,  60 * 60 * 1000UL);
-    case '4':
-      return TaskNotifyArgs(LED_OUPUT,  80 * 60 * 1000UL);
-    case '5':
-      return TaskNotifyArgs(LED_OUPUT, 100 * 60 * 1000UL);
-    case '6':
-      return TaskNotifyArgs(LED_OUPUT, 120 * 60 * 1000UL);
-    case '7':
-      return TaskNotifyArgs(LED_OUPUT, 140 * 60 * 1000UL);
-    case '8':
-      return TaskNotifyArgs(LED_OUPUT, 160 * 60 * 1000UL);
-    case '9':
-      return TaskNotifyArgs(LED_OUPUT, 180 * 60 * 1000UL);
-    default:
-      return TaskNotifyArgs(LED_OUPUT, 200UL);
   }
 }
